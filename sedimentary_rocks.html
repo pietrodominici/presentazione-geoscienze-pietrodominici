@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Rocce Sedimentarie</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<style>
+:root{
+  --ocra:#C8860A;--terra:#C1440E;--sabbia:#E8D5A3;--oceano:#1B4F72;
+  --salvia:#6B8F71;--oro:#D4AF37;--crema:#F5ECD7;--scuro:#0f0a06;
+  --mid:#2a1a0e;--card:rgba(255,255,255,0.04);--border:rgba(212,175,55,0.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;scroll-behavior:smooth}
+html{font-size:16px}
+body{background:var(--scuro);color:var(--sabbia);font-family:'Montserrat',sans-serif;overflow-x:hidden}
+
+/* PROGRESS BAR */
+#progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--terra),var(--oro));z-index:999;width:0%;transition:width .1s}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:900;padding:1rem 3rem;display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(12px);background:rgba(15,10,6,.7);border-bottom:1px solid rgba(212,175,55,.1)}
+.nav-logo{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--oro);letter-spacing:.05em}
+.nav-links{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:flex-end}
+.nav-dot{width:8px;height:8px;border-radius:50%;background:rgba(212,175,55,.25);cursor:pointer;transition:all .3s;border:1px solid rgba(212,175,55,.4)}
+.nav-dot.active{background:var(--oro);transform:scale(1.3)}
+.nav-dot:hover{background:rgba(212,175,55,.6)}
+
+/* SECTIONS */
+section{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:6rem 0 4rem}
+
+/* ===== SLIDE 1: COVER ===== */
+#s1{background:radial-gradient(ellipse at 30% 50%,#1B4F72 0%,#0f0a06 60%)}
+#strata-bg{position:absolute;inset:0;width:100%;height:100%;opacity:.6}
+.cover-inner{position:relative;z-index:2;text-align:center;padding:2rem}
+.cover-tag{font-family:'Montserrat',sans-serif;font-size:.75rem;letter-spacing:.5em;text-transform:uppercase;color:var(--oro);margin-bottom:2rem;opacity:.8}
+.cover-title{font-family:'Playfair Display',serif;font-size:clamp(3.5rem,9vw,8rem);line-height:.95;color:var(--crema);text-shadow:0 0 80px rgba(212,175,55,.2)}
+.cover-title span{color:var(--oro);display:block}
+.cover-sub{font-family:'Montserrat',sans-serif;font-size:clamp(.9rem,2vw,1.2rem);letter-spacing:.4em;text-transform:uppercase;color:var(--sabbia);margin-top:1.5rem;opacity:.7}
+.cover-divider{width:120px;height:1px;background:linear-gradient(90deg,transparent,var(--oro),transparent);margin:2rem auto}
+.cover-stats{display:flex;gap:3rem;justify-content:center;margin-top:2rem;flex-wrap:wrap}
+.cover-stat{text-align:center}
+.cover-stat .n{font-family:'Playfair Display',serif;font-size:2.5rem;color:var(--oro)}
+.cover-stat .l{font-family:'Montserrat',sans-serif;font-size:.7rem;text-transform:uppercase;letter-spacing:.15em;opacity:.6;margin-top:.2rem}
+.scroll-ind{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.4rem;opacity:.5;animation:bobble 2s ease-in-out infinite}
+.scroll-ind span{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase}
+.scroll-ind .arr{font-size:1.2rem;animation:bobble 1.5s ease-in-out infinite}
+@keyframes bobble{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
+
+/* ===== COMMON LAYOUT ===== */
+.container{width:100%;max-width:1300px;margin:0 auto;padding:0 3rem}
+.section-label{font-size:.7rem;letter-spacing:.35em;text-transform:uppercase;color:var(--oro);opacity:.7;margin-bottom:.8rem}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,5vw,3.8rem);line-height:1.1;color:var(--crema);margin-bottom:1.2rem}
+.section-title em{color:var(--oro);font-style:normal}
+.gold-bar{width:50px;height:3px;background:var(--oro);border-radius:2px;margin-bottom:1.8rem}
+.body{font-size:clamp(.85rem,1.1vw,1rem);line-height:1.9;color:rgba(232,213,163,.8)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.four-col{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem}
+strong{color:var(--sabbia)}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .9s ease,transform .9s ease}
+.reveal.vis{opacity:1;transform:none}
+.reveal-left{opacity:0;transform:translateX(-40px);transition:opacity .9s ease,transform .9s ease}
+.reveal-left.vis{opacity:1;transform:none}
+.reveal-right{opacity:0;transform:translateX(40px);transition:opacity .9s ease,transform .9s ease}
+.reveal-right.vis{opacity:1;transform:none}
+
+/* 3D CANVAS CONTAINERS */
+.canvas-3d{border-radius:20px;overflow:hidden;position:relative;background:rgba(0,0,0,.3);border:1px solid var(--border)}
+.canvas-3d canvas{display:block;width:100%!important;height:100%!important}
+.canvas-label{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);font-family:'Montserrat',sans-serif;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(232,213,163,.5);white-space:nowrap;backdrop-filter:blur(4px);background:rgba(0,0,0,.3);padding:.3rem .8rem;border-radius:20px}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.4rem;transition:all .35s;cursor:default}
+.card:hover{background:rgba(212,175,55,.08);border-color:rgba(212,175,55,.5);transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,.4)}
+.card-icon{font-size:2rem;margin-bottom:.8rem}
+.card-title{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--oro);margin-bottom:.5rem}
+.card-body{font-size:.8rem;line-height:1.7;color:rgba(232,213,163,.7)}
+
+/* HIGHLIGHT BOX */
+.hl-box{border-radius:14px;padding:1.4rem 1.8rem}
+.hl-gold{background:rgba(212,175,55,.07);border:1px solid rgba(212,175,55,.25)}
+.hl-blue{background:rgba(27,79,114,.12);border:1px solid rgba(27,79,114,.35)}
+.hl-green{background:rgba(107,143,113,.08);border:1px solid rgba(107,143,113,.25)}
+.hl-red{background:rgba(193,68,14,.08);border:1px solid rgba(193,68,14,.3)}
+
+/* TAG PILLS */
+.pill{display:inline-block;padding:.2rem .7rem;border-radius:20px;font-size:.68rem;margin:.15rem;font-family:'Montserrat',sans-serif}
+.pill-gold{background:rgba(212,175,55,.15);color:var(--oro);border:1px solid rgba(212,175,55,.3)}
+.pill-blue{background:rgba(27,79,114,.2);color:#7eb8d4;border:1px solid rgba(27,79,114,.4)}
+.pill-green{background:rgba(107,143,113,.15);color:#a8d5b5;border:1px solid rgba(107,143,113,.3)}
+.pill-red{background:rgba(193,68,14,.15);color:#e8a090;border:1px solid rgba(193,68,14,.3)}
+
+/* TIMELINE */
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:1.5rem;padding:1rem 0 1rem 1.8rem;border-left:2px solid rgba(212,175,55,.2);position:relative}
+.tl-item::before{content:'';position:absolute;left:-7px;top:1.3rem;width:12px;height:12px;border-radius:50%;background:var(--oro);box-shadow:0 0 10px rgba(212,175,55,.4)}
+.tl-num{font-family:'Playfair Display',serif;font-size:2.2rem;color:rgba(212,175,55,.2);line-height:1;flex-shrink:0;width:2.5rem}
+.tl-text h4{font-family:'Playfair Display',serif;font-size:1rem;color:var(--sabbia);margin-bottom:.3rem}
+.tl-text p{font-size:.8rem;line-height:1.7;color:rgba(232,213,163,.65)}
+
+/* TABLE */
+.rock-table{width:100%;border-collapse:collapse;margin-top:1.5rem}
+.rock-table th{font-family:'Playfair Display',serif;font-size:.9rem;color:var(--oro);padding:.85rem 1.1rem;border-bottom:2px solid rgba(212,175,55,.25);text-align:left;background:rgba(212,175,55,.05)}
+.rock-table td{font-size:.8rem;color:rgba(232,213,163,.8);padding:.75rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.05);line-height:1.6;vertical-align:top}
+.rock-table tr:hover td{background:rgba(212,175,55,.04)}
+
+/* CYCLE NODES */
+.cycle-wrap{position:relative;width:320px;height:320px;flex-shrink:0}
+.cycle-svg{position:absolute;inset:0}
+.c-node{position:absolute;width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.65rem;font-weight:600;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:transform .3s;cursor:default;line-height:1.3}
+.c-node:hover{transform:scale(1.12) !important}
+.cn1{top:0;left:50%;transform:translateX(-50%);background:radial-gradient(circle,#e07b39,#a04010)}
+.cn2{right:0;top:50%;transform:translateY(-50%);background:radial-gradient(circle,#1B4F72,#0d2d42)}
+.cn3{bottom:0;left:50%;transform:translate(-50%,0);background:radial-gradient(circle,#6B8F71,#3d5c42)}
+.cn4{left:0;top:50%;transform:translateY(-50%);background:radial-gradient(circle,#C8860A,#8a5c06)}
+.c-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:90px;height:90px;border-radius:50%;background:radial-gradient(var(--ocra),var(--terra));display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:.75rem;color:#fff;text-align:center;box-shadow:0 0 30px rgba(200,134,10,.4);z-index:2;line-height:1.3}
+
+/* STAT BIG */
+.stat-big{text-align:center}
+.stat-big .n{font-family:'Playfair Display',serif;font-size:3.5rem;color:var(--oro);line-height:1}
+.stat-big .l{font-size:.72rem;text-transform:uppercase;letter-spacing:.15em;opacity:.6;margin-top:.3rem}
+
+/* ENV CARDS */
+.env-card{border-radius:16px;padding:1.5rem;border:1px solid}
+.env-c{background:rgba(200,134,10,.07);border-color:rgba(200,134,10,.3)}
+.env-m{background:rgba(27,79,114,.1);border-color:rgba(27,79,114,.35)}
+.env-t{background:rgba(107,143,113,.07);border-color:rgba(107,143,113,.3)}
+.env-icon{font-size:2rem;margin-bottom:.8rem}
+.env-title{font-family:'Playfair Display',serif;font-size:1.05rem;margin-bottom:.6rem}
+.env-list{list-style:none;display:flex;flex-direction:column;gap:.35rem}
+.env-list li{font-size:.78rem;color:rgba(232,213,163,.7);line-height:1.5}
+.env-list li::before{content:'▸ ';color:var(--oro);font-size:.6rem}
+
+/* LOCATION GRID */
+.loc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-top:2rem}
+.loc-card{border-radius:14px;overflow:hidden;border:1px solid var(--border);background:var(--card);transition:all .3s;cursor:default}
+.loc-card:hover{transform:translateY(-6px) scale(1.02);border-color:var(--oro);box-shadow:0 12px 30px rgba(0,0,0,.4)}
+.loc-thumb{height:100px;display:flex;align-items:center;justify-content:center;font-size:3rem;background:rgba(255,255,255,.02)}
+.loc-name{font-family:'Playfair Display',serif;font-size:.88rem;color:var(--oro);padding:.6rem .9rem .2rem}
+.loc-country{font-size:.68rem;color:rgba(232,213,163,.5);padding:0 .9rem .8rem}
+
+/* CTA */
+.cta-btn{display:inline-block;padding:.9rem 2.4rem;background:linear-gradient(90deg,var(--ocra),var(--oro));color:var(--scuro);font-family:'Montserrat',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;border-radius:40px;cursor:pointer;border:none;box-shadow:0 4px 24px rgba(212,175,55,.3);transition:all .3s}
+.cta-btn:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(212,175,55,.5)}
+
+/* SECTION BACKGROUNDS */
+#s2{background:linear-gradient(160deg,#0f0a06 0%,#1a1208 50%,#0d1f35 100%)}
+#s3{background:linear-gradient(135deg,#080e18 0%,#102a1a 60%,#1a0e06 100%)}
+#s4{background:linear-gradient(135deg,#0a0806 0%,#1a1510 50%,#0d1e30 100%)}
+#s5{background:linear-gradient(135deg,#060a14 0%,#1B4F72 50%,#1a0e06 100%)}
+#s6{background:linear-gradient(135deg,#080e18 0%,#0f2235 50%,#0c1a0c 100%)}
+#s7{background:linear-gradient(135deg,#0a0604 0%,#2a1408 50%,#060c08 100%)}
+#s8{background:linear-gradient(135deg,#0a0a06 0%,#1e1808 50%,#0a1428 100%)}
+#s9{background:linear-gradient(135deg,#060a14 0%,#102030 50%,#1a1008 100%)}
+#s10{background:linear-gradient(135deg,#060c08 0%,#0e2015 50%,#1a1008 100%)}
+#s11{background:linear-gradient(135deg,#080608 0%,#1a0c18 50%,#080e08 100%)}
+#s12{background:linear-gradient(135deg,#040810 0%,#0a1c28 50%,#060e06 100%)}
+#s13{background:linear-gradient(135deg,#0a0604 0%,#1a1208 50%,#060810 100%)}
+#s14{background:linear-gradient(135deg,#060c06 0%,#0e1e10 50%,#1a1008 100%)}
+#s15{background:radial-gradient(ellipse at 50% 30%,#1a1208 0%,#0a0806 60%)}
+
+/* BAR CHART */
+.bar-row{display:flex;align-items:center;gap:1rem;margin-bottom:.8rem}
+.bar-label-l{font-size:.78rem;color:var(--sabbia);width:120px;text-align:right;flex-shrink:0}
+.bar-track{flex:1;height:24px;background:rgba(255,255,255,.05);border-radius:20px;overflow:hidden}
+.bar-fill{height:100%;border-radius:20px;display:flex;align-items:center;justify-content:flex-end;padding-right:.7rem;font-size:.7rem;color:#fff;font-weight:600;width:0;transition:width 1.5s cubic-bezier(.77,0,.175,1)}
+
+/* formula box */
+.formula{font-family:'Courier New',monospace;font-size:.85rem;background:rgba(27,79,114,.15);border:1px solid rgba(27,79,114,.3);border-radius:8px;padding:.7rem 1.2rem;color:#7eb8d4;margin:.6rem 0;display:inline-block}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<nav>
+  <div class="nav-logo">Rocce Sedimentarie</div>
+  <div class="nav-links" id="nav-dots"></div>
+</nav>
+
+<!-- ===== S1 COVER ===== -->
+<section id="s1">
+  <canvas id="strata-bg"></canvas>
+  <div class="cover-inner reveal">
+    <div class="cover-tag">Geologia · Sedimentologia · Guida Completa</div>
+    <h1 class="cover-title">Le Rocce<span>Sedimentarie</span></h1>
+    <div class="cover-divider"></div>
+    <p class="cover-sub">15 capitoli · dalla degradazione alla roccia</p>
+    <div class="cover-stats">
+      <div class="cover-stat"><div class="n">~8%</div><div class="l">Volume crosta</div></div>
+      <div class="cover-stat"><div class="n">75%</div><div class="l">Superficie emersa</div></div>
+      <div class="cover-stat"><div class="n">4</div><div class="l">Fasi del ciclo</div></div>
+      <div class="cover-stat"><div class="n">3</div><div class="l">Famiglie principali</div></div>
+    </div>
+  </div>
+  <div class="scroll-ind"><span>Scorri</span><div class="arr">↓</div></div>
+</section>
+
+<!-- ===== S2 DEFINIZIONE ===== -->
+<section id="s2">
+  <div class="container">
+    <div class="two-col">
+      <div class="reveal-left">
+        <div class="section-label">01 — Definizione</div>
+        <h2 class="section-title">Cosa sono le Rocce <em>Sedimentarie</em>?</h2>
+        <div class="gold-bar"></div>
+        <p class="body">Le rocce sedimentarie sono rocce <strong>esogene</strong>, formate alla superficie terrestre per accumulo, trasporto e consolidamento di sedimenti. Si originano dalla degradazione di rocce preesistenti, dalla precipitazione chimica o dall'attività biologica.</p>
+        <p class="body" style="margin-top:1rem">Nonostante rappresentino solo l'<strong>8% del volume</strong> della crosta, ricoprono circa il <strong>75% delle terre emerse</strong>, formando la sottile "pellicola sedimentaria" del pianeta.</p>
+        <div style="display:flex;gap:2rem;margin-top:1.8rem;flex-wrap:wrap">
+          <div class="stat-big"><div class="n">8%</div><div class="l">Volume crosta</div></div>
+          <div class="stat-big"><div class="n">75%</div><div class="l">Sup. emersa</div></div>
+          <div class="stat-big"><div class="n">~3 km</div><div class="l">Spessore medio</div></div>
+        </div>
+      </div>
+      <div class="reveal-right">
+        <p style="font-size:.72rem;text-transform:uppercase;letter-spacing:.2em;color:var(--oro);margin-bottom:1.2rem">Distribuzione in volume — crosta terrestre</p>
+        <div id="bars-container">
+          <div class="bar-row"><div class="bar-label-l">Magmatiche</div><div class="bar-track"><div class="bar-fill" data-w="65" style="background:linear-gradient(90deg,#c1440e,#8a1f00)">65%</div></div></div>
+          <div class="bar-row"><div class="bar-label-l">Metamorfiche</div><div class="bar-track"><div class="bar-fill" data-w="27" style="background:linear-gradient(90deg,#6B8F71,#3d5c42)">27%</div></div></div>
+          <div class="bar-row"><div class="bar-label-l">Sedimentarie</div><div class="bar-track"><div class="bar-fill" data-w="8" style="background:linear-gradient(90deg,var(--ocra),#a06808)">8%</div></div></div>
+        </div>
+        <div class="hl-blue" style="margin-top:1.8rem;border-radius:14px;padding:1.2rem 1.5rem">
+          <p style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--sabbia);font-style:italic;line-height:1.7">"Le rocce sedimentarie sono gli archivi naturali della storia della Terra: ogni strato è una pagina del passato geologico."</p>
+        </div>
+        <!-- 3D scene definiton/sphere -->
+        <div class="canvas-3d" style="height:200px;margin-top:1.5rem" id="c3d-s2">
+          <div class="canvas-label">Modello 3D — Struttura a strati</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== S3 CICLO ===== -->
+<section id="s3">
+  <div class="container">
+    <div class="two-col reveal">
+      <div>
+        <div class="section-label">02 — Processo</div>
+        <h2 class="section-title">Il Ciclo <em>Sedimentario</em></h2>
+        <div class="gold-bar"></div>
+        <p class="body">Il ciclo sedimentario trasforma rocce preesistenti in nuove rocce attraverso <strong>4 fasi principali</strong> in un processo continuo che si estende su milioni di anni.</p>
+        <div class="timeline" style="margin-top:1.5rem">
+          <div class="tl-item"><div class="tl-num">01</div><div class="tl-text"><h4>Degradazione (Weathering)</h4><p>Frammentazione fisica e chimica delle rocce preesistenti ad opera di agenti atmosferici, acqua, gelo e organismi.</p></div></div>
+          <div class="tl-item"><div class="tl-num">02</div><div class="tl-text"><h4>Trasporto</h4><p>Movimento dei sedimenti da parte di fiumi, vento, ghiacciai o gravità verso i bacini di deposizione.</p></div></div>
+          <div class="tl-item"><div class="tl-num">03</div><div class="tl-text"><h4>Sedimentazione</h4><p>Deposito dei materiali quando diminuisce l'energia cinetica del mezzo di trasporto.</p></div></div>
+          <div class="tl-item"><div class="tl-num">04</div><div class="tl-text"><h4>Diagenesi</h4><p>Compattazione e cementazione che trasformano il sedimento sciolto in roccia consolidata.</p></div></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:2rem">
+        <div style="display:flex;align-items:center;justify-content:center">
+          <div class="cycle-wrap">
+            <svg class="cycle-svg" viewBox="0 0 320 320" fill="none">
+              <path d="M160 44 A116 116 0 0 1 276 160" stroke="rgba(224,123,57,.5)" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#a1)"/>
+              <path d="M276 160 A116 116 0 0 1 160 276" stroke="rgba(27,79,114,.5)" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#a2)"/>
+              <path d="M160 276 A116 116 0 0 1 44 160" stroke="rgba(107,143,113,.5)" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#a3)"/>
+              <path d="M44 160 A116 116 0 0 1 160 44" stroke="rgba(200,134,10,.5)" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#a4)"/>
+              <defs>
+                <marker id="a1" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="rgba(224,123,57,.8)"/></marker>
+                <marker id="a2" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="rgba(27,79,114,.8)"/></marker>
+                <marker id="a3" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="rgba(107,143,113,.8)"/></marker>
+                <marker id="a4" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="rgba(200,134,10,.8)"/></marker>
+              </defs>
+            </svg>
+            <div class="c-node cn1">Degra-<br>dazione</div>
+            <div class="c-node cn2">Trasporto</div>
+            <div class="c-node cn3">Sedimen-<br>tazione</div>
+            <div class="c-node cn4">Diagenesi</div>
+            <div class="c-center">Ciclo<br>Sedim.</div>
+          </div>
+        </div>
+        <div class="canvas-3d" style="height:180px;width:100%" id="c3d-s3">
+          <div class="canvas-label">3D — Sedimentazione stratificata</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== S4 DEGRADAZIONE FISICA ===== -->
+<section id="s4">
+  <div class="container">
+    <div class="two-col reveal">
+      <div>
+        <div class="section-label">03 — Fase 1a</div>
+        <h2 class="section-title">Degradazione <em>Fisica</em></h2>
+        <div class="gold-bar"></div>
+        <p class="body">Il weathering meccanico frammenta le rocce <strong>senza alterarne la composizione chimica</strong>. I prodotti mantengono la stessa natura mineralogica della roccia madre.</p>
+        <div class="four-col" style="margin-top:1.5rem;grid-template-columns:repeat(2,1fr)">
+          <div class="card"><div class="card-icon">🧊</div><div class="card-title">Gelo-Disgelo</div><div class="card-body">L'acqua gela nelle fessure aumentando di volume del 9%, spaccando la roccia con enorme pressione meccanica.</div></div>
+          <div class="card"><div class="card-icon">☀️</div><div class="card-title">Insolazione</div><div class="card-body">Cicli di espansione termica diurna e contrazione notturna creano stress nei minerali della roccia.</div></div>
+          <div class="card"><div class="card-icon">🌱</div><div class="card-title">Azione Biologica</div><div class="card-body">Radici di piante che crescono nelle fessure esercitano pressioni crescenti spaccando la roccia dall'interno.</div></div>
+          <div class="card"><div class="card-icon">💨</div><div class="card-title">Abrasione Eolica</div><div class="card-body">Attrito tra particelle trasportate da vento, acqua o ghiaccio contro la superficie rocciosa.</div></div>
+        </div>
+        <div class="hl-gold" style="margin-top:1.2rem;border-radius:12px;padding:1rem 1.4rem">
+          <p style="font-size:.82rem;line-height:1.7"><strong>Prodotto finale:</strong> frammenti da blocchi metrici (boulders) a granuli microscopici (argilla), via via più arrotondati col trasporto.</p>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:1.5rem">
+        <div class="canvas-3d" style="height:260px" id="c3d-s4">
+          <div class="canvas-label">3D — Ciclo gelo-disgelo</div>
+        </div>
+        <div class="hl-blue" style="border-radius:14px;padding:1.2rem 1.5rem">
+          <p style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--sabbia);margin-bottom:.5rem">Scala di Wentworth</p>
+          <div style="display:flex;flex-direction:column;gap:.3rem;font-size:.78rem;color:rgba(232,213,163,.75)">
+            <div style="display:flex;justify-content:space-between"><span>Boulder</span><span style="color:var(--oro)">&gt; 256 mm</span></div>
+            <div style="display:flex;justify-content:space-between"><span>Ciottolo</span><span style="color:var(--oro)">64–256 mm</span></div>
+            <div style="display:flex;justify-content:space-between"><span>Ghiaia</span><span style="color:var(--oro)">2–64 mm</span></div>
+            <div style="display:flex;justify-content:space-between"><span>Sabbia</span><span style="color:var(--oro)">0.063–2 mm</span></div>
+            <div style="display:flex;justify-content:space-between"><span>Limo</span><span style="color:var(--oro)">0.004–0.063 mm</span></div>
+            <div style="display:flex;justify-content:space-between"><span>Argilla</span><span style="color:var(--oro)">&lt; 0.004 mm</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== S5 DEGRADAZIONE CHIMICA ===== -->
+<section id="s5">
+  <div class="container">
+    <div class="two-col reveal">
+      <div style="display:flex;flex-direction:column;gap:1.5rem">
+        <div class="canvas-3d" style="height:260px" id="c3d-s5">
+          <div class="canvas-label">3D — Reazioni di dissoluzione</div>
+        </div>
+        <div class="hl-green" style="border-radius:14px;padding:1.2rem">
+          <p style="font-family:'Playfair Display',serif;font-size:.95rem;color:#a8d5b5;margin-bottom:.6rem">Carsismo — dissoluzione del calcare</p>
+          <p style="font-size:.78rem;line-height:1.7;color:rgba(232,213,163,.75)">H₂O + CO₂ → H₂CO₃ (acido carbonico) che attacca i carbonati. Origine di grotte, doline, stalattiti — <strong>Grotte di Frasassi, Puglia, Alpi Apuane.</strong></p>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">04 — Fase 1b</div>
+        <h2 class="section-title">Degradazione <em>Chimica</em></h2>
+        <div class="gold-bar"></div>
+        <p class="body">Il weathering chimico altera la <strong>composizione mineralogica</strong> delle rocce. Più efficace nei climi caldi e umidi tropicali.</p>
+        <div class="four-col" style="margin-top:1.5rem;grid-template-columns:repeat(2,1fr)">
+          <div class="card"><div class="card-icon">💧</div><div class="card-title">Idrolisi</div><div class="card-body">Feldspati + H₂O → Caolinite (argilla) + Silice + Cationi. La reazione più comune nella crosta continentale.</div></div>
+          <div class="card"><div class="card-icon">🫧</div><div class="card-title">Dissoluzione</div><div class="card-body">Calcari e dolomie si dissolvono in acqua acidula. Crea paesaggi carsici spettacolari.</div></div>
+          <div class="card"><div class="card-icon">🦠</div><div class="card-title">Ossidazione</div><div class="card-body">Fe²⁺ + O₂ → ossidi (ematite, limonite): responsabili dei colori rosso-arancio delle rocce.</div></div>
+          <div class="card"><div class="card-icon">🌊</div><div class="card-title">Idratazione</div><div class="card-body">Assorbimento d'acqua da minerali anidri: anidrite CaSO₄ → gesso CaSO₄·2H₂O (+aumento volume).</div></div>
+        </div>
+        <div class="formula">KAlSi₃O₈ + H₂O → Al₂Si₂O₅(OH)₄ + SiO₂ + K⁺</div>
+        <p style="font-size:.7rem;color:rgba(232,213,163,.5);margin-top:.2rem">Feldspato potassico → Caolinite + Silice + Potassio</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== S6 TRASPORTO ===== -->
+<section id="s6">
+  <div class="container reveal">
+    <div class="section-label">05 — Fase 2 & 3</div>
+    <h2 class="section-title">Trasporto & <em>Sedimentazione</em></h2>
+    <div class="gold-bar"></div>
+    <div class="two-col" style="margin-top:0;align-items:start">
+      <div>
+        <p class="body">I sedimenti vengono mobilizzati e trasportati, poi depositati quando l'energia cinetica cala. Prima si depositano i clasti più grossi, ultimi i più fini (<strong>legge di Stokes</strong>).</p>
+        <div style="display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.5rem">
+          <div style="background:rgba(27,79,114,.15);border:1px solid rgba(27,79,114,.3);border-radius:40px;padding:.6rem 1.3rem;display:flex;align-items:center;gap:.6rem"><span style="font-size:1.3rem">🌊</span><span style="font-size:.85rem;font-weight:600">Fiumi & Acque</span></div>
+          <div style="background:rgba(200,134,10,.1);border:1px solid rgba(200,134,10,.25);border-radius:40px;padding:.6rem 1.3rem;display:flex;align-items:center;gap:.6rem"><span style="font-size:1.3rem">💨</span><span style="font-size:.85rem;font-weight:600">Vento (Eolico)</span></div>
+          <div style="background:rgba(150,200,230,.08);border:1px solid rgba(150,200,230,.2);border-radius:40px;padding:.6rem 1.3rem;display:flex;align-items:center;gap:.6rem"><span style="font-size:1.3rem">🧊</span><span style="font-size:.85rem;font-weight:600">Ghiacciai</span></div>
+          <div style="background:rgba(193,68,14,.08);border:1px solid rgba(193,68,14,.25);border-radius:40px;padding:.6rem 1.3rem;display:flex;align-items:center;gap:.6rem"><span style="font-size:1.3rem">⬇️</span><span style="font-size:.85bg;font-weight:600">Gravità</span></div>
+        </div>
+        <div class="three-col" style="margin-top:1.5rem">
+          <div class="hl-blue" style="border-radius:12px;padding:1.1rem"><p style="font-family:'Playfair Display',serif;font-size:.95rem;color:#7eb8d4;margin-bottom:.4rem">Carico di Fondo</p><p style="font-size:.78rem;line-height:1.6;color:rgba(232,213,163,.7)">Ghiaia e sabbia rotolano o saltellano (saltazione) sul letto.</p></div>
+          <div class="hl-green" style="border-radius:12px;padding:1.1rem"><p style="font-family:'Playfair Display',serif;font-size:.95rem;color:#a8d5b5;margin-bottom:.4rem">Sospeso</p><p style="font-size:.78rem;line-height:1.6;color:rgba(232,213,163,.7)">Limo e argilla trasportati in sospensione nella colonna d'acqua.</p></div>
+          <div class="hl-gold" style="border-radius:12px;padding:1.1rem"><p style="font-family:'Playfair Display',serif;font-size:.95rem;color:var(--oro);margin-bottom:.4rem">Disciolto</p><p style="font-size:.78rem;line-height:1.6;color:rgba(232,213,163,.7)">Ioni in soluzione che precipitano chimicamente a valle.</p></div>
+        </div>
+      </div>
+      <div class="canvas-3d" style="height:340px" id="c3d-s6">
+        <div class="canvas-label">3D — Trasporto fluviale e deposizione</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== S7 DIAGENESI ===== -->
+<section id="s7">
+  <div class="container">
+    <div class="two-col reveal">
+      <div>
+        <div class="section-label">06 — Fase 4</div>
+        <h2 class="section-title"><em>Diagenesi</em></h2>
+        <div class="gold-bar"></div>
+        <p class="body">Processi fisici, chimici e biologici che trasformano un sedimento sciolto in <strong>roccia consolidata (litificazione)</strong>, a T &lt; 200°C e pressioni moderate.</p>
+        <div class="timeline" style="margin-top:1.5rem">
+          <div class="tl-item"><div class="tl-num">01</div><div class="tl-text"><h4>Compattazione</h4><p>Il peso dei sedimenti sovrastanti espelle l'acqua interstiziale riducendo la porosità fino al 40%.</p></div></div>
+          <div class="tl-item"><div class="tl-num">02</div><div class="tl-text"><h4>Cementazione</h4><p>Minerali precipitati (calcite, quarzo, ossidi di Fe) riempiono i pori e saldano i granuli tra loro.</p></div></div>
+          <div class="tl-item"><div class="tl-num">03</div><div class="tl-text"><h4>Ricristallizzazione</h4><p>I minerali instabili si riorganizzano in forme stabili. Tipica nei calcari che evolvono verso il marmo.</p></div></div>
+          <div class="tl-item"><div class="tl-num">04</div><div class="tl-text"><h4>Dissoluzione & Sostituzione</h4><p>Dolomitizzazione, silicizzazione dei fossili: minerali sostituiti a livello atomico.</p></div></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:1.5rem">
+        <div class="canvas-3d" style="height:250px" id="c3d-s7">
+          <div class="canvas-label">3D — Compattazione e cementazione</div>
+        </div>
+        <div class="hl-gold" style="border-radius:14px;padding:1.4rem">
+          <p style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--oro);margin-bottom:.8rem">⏱ Tempi Geologici</p>
+          <div style="display:flex;flex-direction:column;gap:.5rem">
+            <div style="display:flex;justify-content:space-between;font-size:.8rem;color:rgba(232,213,163,.8)"><span>Sabbia → Arenaria</span><span style="color:var(--oro)">10⁴–10⁶ anni</span></div>
+            <div style="height:1px;background:rgba(255,255,255,.05)"></div>
+            <div style="display:flex;justify-content:space-between;font-size:.8rem;color:rgba(232,213,163,.8)"><span>Limo → Siltite</span><span style="color:var(--oro)">10⁵–10⁶ anni</span></div>
+            <div style="height:1px;background:rgba(255,255,255,.05)"></div>
+            <div style="display:flex;justify-content:space-between;font-size:.8rem;color:rgba(232,213,163,.8)"><span>Calcare organogeno</span><span style="color:var(--oro)">10³–10⁵ anni</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== S8 CLASTICHE ===== -->
+<section id="s8">
+  <div class="container reveal">
+    <div class="section-label">07 — Classificazione</div>
+    <h2 class="section-title">Rocce <em>Clastiche</em></h2>
+    <div class="gold-bar"></div>
+    <p class="body" style="max-width:750px">Formate da frammenti di rocce preesistenti, classificate per <strong>dimensione dei clasti</strong> (scala di Wentworth) e per <strong>grado di maturità tessiturale</strong>.</p>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-top:2rem">
+      <div class="card" style="border-top:3px solid var(--terra)">
+        <div class="canvas-3d" style="height:110px;margin-bottom:.8rem" id="c3d-conglo"><div class="canvas-label" style="font-size:.58rem">3D Conglomerato</div></div>
+        <div class="card-title">Conglomerato</div>
+        <div class="pill pill-red">&gt; 2 mm · arrotondati</div>
+        <div class="card-body" style="margin-top:.5rem">Ciottoli arrotondati cementati. Ambiente fluviale o litorale ad alta energia.</div>
+      </div>
+      <div class="card" style="border-top:3px solid var(--ocra)">
+        <div class="canvas-3d" style="height:110px;margin-bottom:.8rem" id="c3d-breccia"><div class="canvas-label" style="font-size:.58rem">3D Breccia</div></div>
+        <div class="card-title">Breccia</div>
+        <div class="pill pill-gold">&gt; 2 mm · angolosi</div>
+        <div class="card-body" style="margin-top:.5rem">Frammenti angolosi: breve trasporto o frana. Fonte prossimale.</div>
+      </div>
+      <div class="card" style="border-top:3px solid var(--sabbia)">
+        <div class="canvas-3d" style="height:110px;margin-bottom:.8rem" id="c3d-arenaria"><div class="canvas-label" style="font-size:.58rem">3D Arenaria</div></div>
+        <div class="card-title">Arenaria</div>
+        <div class="pill pill-gold">0.063–2 mm</div>
+        <div class="card-body" style="margin-top:.5rem">La più comune. Ambienti fluviali, desertici, litorali. Ottima roccia serbatoio petrolio.</div>
+      </div>
+      <div class="card" style="border-top:3px solid var(--salvia)">
+        <div class="canvas-3d" style="height:110px;margin-bottom:.8rem" id="c3d-argilla"><div class="canvas-label" style="font-size:.58rem">3D Argillite</div></div>
+        <div class="card-title">Argillite / Siltite</div>
+        <div class="pill pill-green">&lt; 0.063 mm</div>
+        <div class="card-body" style="margin-top:.5rem">Granuli finissimi. Fondali profondi, lagune. Rocce di copertura per idrocarburi.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== S9 CHIMICHE ===== -->
+<section id="s9">
+  <div class="container">
+    <div class="two-col reveal">
+      <div>
+        <div class="section-label">08 — Classificazione</div>
+        <h2 class="section-title">Rocce <em>Chimiche</em></h2>
+        <div class="gold-bar"></div>
+        <p class="body">Formate per <strong>precipitazione chimica diretta</strong> da soluzioni acquose supersature, in assenza di organismi biologici significativi.</p>
+        <div style="margin-top:1.5rem;display:flex;flex-direction:column;gap:1rem">
+          <div class="hl-blue" style="border-radius:14px;padding:1.3rem">
+            <h4 style="font-family:'Playfair Display',serif;font-size:1.05rem;color:#7eb8d4;margin-bottom:.5rem">💧 Evaporiti</h4>
+            <p style="font-size:.82rem;line-height:1.7;color:rgba(232,213,163,.75)">Precipitano per evaporazione di bacini marini/lacustri. Sequenza: <strong>Calcite → Gesso → Anidrite → Salgemma → Sali K/Mg</strong>. Richiedono evaporazione &gt;90%.</p>
+            <div style="margin-top:.7rem;display:flex;gap:.4rem;flex-wrap:wrap">
+              <span class="pill pill-blue">Gesso CaSO₄·2H₂O</span>
+              <span class="pill pill-blue">Salgemma NaCl</span>
+              <span class="pill pill-blue">Anidrite CaSO₄</span>
+            </div>
+          </div>
+          <div class="hl-gold" style="border-radius:14px;padding:1.3rem">
+            <h4 style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--oro);margin-bottom:.5rem">🏛️ Calcari Inorganici</h4>
+            <p style="font-size:.82rem;line-height:1.7;color:rgba(232,213,163,.75)"><strong>Travertino:</strong> precipita da sorgenti termali ricche di CaCO₃ (Pamukkale, Tivoli). <strong>Oolitico:</strong> granuli sferici in acque agitate tropicali.</p>
+          </div>
+        </div>
+      </div>
+      <div class="canvas-3d" style="height:420px" id="c3d-s9">
+        <div class="canvas-label">3D — Cristalli di gesso e evaporiti</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== S10 ORGANOGENE ===== -->
+<section id="s10">
+  <div class="container">
+    <div class="two-col reveal">
+      <div class="canvas-3d" style="height:420px" id="c3d-s10">
+        <div class="canvas-label">3D — Barriera corallina e fossili</div>
+      </div>
+      <div>
+        <div class="section-label">09 — Classificazione</div>
+        <h2 class="section-title">Rocce <em>Organogene</em></h2>
+        <div class="gold-bar"></div>
+        <p class="body">Formate dall'accumulo di <strong>resti di organismi viventi</strong> — gusci, scheletri, materia organica. Le più abbondanti della crosta sedimentaria superficiale.</p>
+        <div style="margin-top:1.5rem;display:flex;flex-direction:column;gap:1rem">
+          <div class="hl-green" style="border-radius:14px;padding:1.3rem">
+            <h4 style="font-family:'Playfair Display',serif;font-size:1.05rem;color:#a8d5b5;margin-bottom:.4rem">🐚 Calcari Organogeni</h4>
+            <p style="font-size:.82rem;line-height:1.7;color:rgba(232,213,163,.75)">Gusci di molluschi, foraminiferi, alghe calcaree. Calcare a nummuliti, biocalcarenite, chalk (Cliffe Bianche di Dover).</p>
+          </div>
+          <div class="hl-red" style="border-radius:14px;padding:1.3rem">
+            <h4 style="font-family:'Playfair Display',serif;font-size:1.05rem;color:#e8a090;margin-bottom:.4rem">⛽ Combustibili Fossili</h4>
+            <p style="font-size:.82rem;line-height:1.7;color:rgba(232,213,163,.75)"><strong>Carbone:</strong> Torba → Lignite → Litantrace → Antracite. <strong>Petrolio & Gas:</strong> materia organica marina + calore + pressione.</p>
+          </div>
+          <div class="hl-blue" style="border-radius:14px;padding:1.3rem">
+            <h4 style="font-family:'Playfair Display',serif;font-size:1.05rem;color:#7eb8d4;margin-bottom:.4rem">🏔️ Dolomia CaMg(CO₃)₂</h4>
+            <p style="font-size:.82rem;line-height:1.7;color:rgba(232,213,163,.75)">Spesso di origine diagenetica per sostituzione Ca→Mg. Le <strong>Dolomiti</strong> italiane — Patrimonio UNESCO — ne sono il monumento più spettacolare al mondo.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== S11 CONFRONTO ===== -->
+<section id="s11">
+  <div class="container reveal">
+    <div class="section-label">10 — Confronto</div>
+    <h2 class="section-title">Calcare vs Dolomia <em>vs Marna</em></h2>
+    <div class="gold-bar"></div>
+    <div class="two-col" style="align-items:start">
+      <div>
+        <p class="body">Le tre rocce carbonatiche principali sono spesso confuse ma hanno composizione, proprietà e ambienti di formazione molto diversi.</p>
+        <table class="rock-table">
+          <thead><tr><th>Proprietà</th><th>Calcare</th><th>Dolomia</th><th>Marna</th></tr></thead>
+          <tbody>
+            <tr><td>Composizione</td><td>CaCO₃</td><td>CaMg(CO₃)₂</td><td>CaCO₃ + argilla</td></tr>
+            <tr><td>Test HCl</td><td><span class="pill pill-green">Vivace</span></td><td><span class="pill pill-red">Solo polvere</span></td><td><span class="pill pill-gold">Moderata</span></td></tr>
+            <tr><td>Durezza</td><td>3</td><td>3.5–4</td><td>1–3</td></tr>
+            <tr><td>Fossili</td><td><span class="pill pill-green">Molto comuni</span></td><td><span class="pill pill-red">Rari</span></td><td><span class="pill pill-gold">Possibili</span></td></tr>
+            <tr><td>Uso</td><td>Cemento, marmo</td><td>Refrattari</td><td>Cemento Portland</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="canvas-3d" style="height:360px" id="c3d-s11">
+        <div class="canvas-label">3D — Confronto strutture cristalline</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== S12 AMBIENTI ===== -->
+<section id="s12">
+  <div class="container reveal">
+    <div class="section-label">11 — Paleogeografia</div>
+    <h2 class="section-title">Ambienti di <em>Formazione</em></h2>
+    <div class="gold-bar"></div>
+    <p class="body" style="max-width:700px">L'ambiente di deposizione lascia la sua impronta nella roccia attraverso il concetto di <strong>facies sedimentaria</strong> — insieme di caratteristiche fisiche, chimiche e biologiche che rispecchiano le condizioni originali.</p>
+    <div class="three-col" style="margin-top:2rem">
+      <div class="env-card env-c"><div class="env-icon">🏔️</div><div class="env-title" style="color:var(--oro)">Continentali</div><ul class="env-list"><li>Fluviale (conoidi, piane)</li><li>Eolico (dune desertiche)</li><li>Glaciale (till, varviti)</li><li>Lacustre</li><li>Paludi (torba, carbone)</li></ul></div>
+      <div class="env-card env-m"><div class="env-icon">🌊</div><div class="env-title" style="color:#7eb8d4">Marini</div><ul class="env-list"><li>Zona litorale</li><li>Piattaforma continentale</li><li>Scarpata continentale</li><li>Fondale abissale</li><li>Barriera corallina</li></ul></div>
+      <div class="env-card env-t"><div class="env-icon">🏝️</div><div class="env-title" style="color:#a8d5b5">Transizione</div><ul class="env-list"><li>Delta fluviale</li><li>Laguna costiera</li><li>Estuario</li><li>Spiaggia e dune costiere</li><li>Tidal flat</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== S13 STRUTTURE ===== -->
+<section id="s13">
+  <div class="container reveal">
+    <div class="section-label">12 — Sedimentologia</div>
+    <h2 class="section-title">Strutture <em>Sedimentarie</em></h2>
+    <div class="gold-bar"></div>
+    <div class="two-col" style="align-items:start">
+      <div>
+        <p class="body">Geometrie impresse nel sedimento durante o dopo la deposizione. Sono chiavi interpretative fondamentali dell'ambiente di formazione.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1.5rem">
+          <div class="card"><div class="card-icon">📚</div><div class="card-title">Stratificazione Parallela</div><div class="card-body">Strati orizzontali paralleli. Deposizione tranquilla in acque calme o piane alluvionali.</div></div>
+          <div class="card"><div class="card-icon">📐</div><div class="card-title">Stratif. Incrociata</div><div class="card-body">Lamine inclinate: migrazione di dune eoliche o subacquee ad alta energia.</div></div>
+          <div class="card"><div class="card-icon">🌊</div><div class="card-title">Ripple Marks</div><div class="card-body">Ondulazioni superficiali: simmetrica (onde) o asimmetrica (corrente unidirezionale).</div></div>
+          <div class="card"><div class="card-icon">⬇️</div><div class="card-title">Strati Gradati</div><div class="card-body">Granuli grossi alla base, fini in cima. Torbiditi: flussi di torbida su fondali profondi.</div></div>
+          <div class="card"><div class="card-icon">🦴</div><div class="card-title">Bioturbazioni</div><div class="card-body">Strutture scavate da organismi (icnofossili). Indica sedimento ossigenato e biotopo attivo.</div></div>
+          <div class="card"><div class="card-icon">💧</div><div class="card-title">Mud Cracks</div><div class="card-body">Poligoni di essiccazione in argille. Indica esposizione subaerea e clima semiarido.</div></div>
+        </div>
+      </div>
+      <div class="canvas-3d" style="height:400px" id="c3d-s13">
+        <div class="canvas-label">3D — Formazione degli strati</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== S14 LETTURA ===== -->
+<section id="s14">
+  <div class="container reveal">
+    <div class="section-label">13 — Metodo</div>
+    <h2 class="section-title">Lettura della <em>Roccia</em></h2>
+    <div class="gold-bar"></div>
+    <div class="two-col" style="align-items:start">
+      <div>
+        <p class="body">Come un geologo ricostruisce l'ambiente e la storia di una roccia sedimentaria attraverso l'osservazione sistematica.</p>
+        <div style="display:flex;flex-direction:column;gap:.7rem;margin-top:1.5rem">
+          <div style="background:rgba(212,175,55,.06);border-left:3px solid var(--oro);padding:.9rem 1.2rem;border-radius:0 10px 10px 0"><p style="font-size:.85rem;line-height:1.7"><strong style="color:var(--oro)">1. Macroscopia</strong> — colore, tessitura, strutture visibili a occhio nudo</p></div>
+          <div style="background:rgba(107,143,113,.06);border-left:3px solid var(--salvia);padding:.9rem 1.2rem;border-radius:0 10px 10px 0"><p style="font-size:.85rem;line-height:1.7"><strong style="color:#a8d5b5">2. Test semplici</strong> — HCl (carbonati), durezza, lente d'ingrandimento</p></div>
+          <div style="background:rgba(27,79,114,.08);border-left:3px solid var(--oceano);padding:.9rem 1.2rem;border-radius:0 10px 10px 0"><p style="font-size:.85rem;line-height:1.7"><strong style="color:#7eb8d4">3. Microscopio</strong> — sezione sottile, analisi mineralogica, tipo di cemento</p></div>
+          <div style="background:rgba(200,134,10,.06);border-left:3px solid var(--ocra);padding:.9rem 1.2rem;border-radius:0 10px 10px 0"><p style="font-size:.85rem;line-height:1.7"><strong style="color:var(--oro)">4. Contesto</strong> — posizione nella sequenza, rapporti con rocce adiacenti, fossili</p></div>
+        </div>
+        <div style="margin-top:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+          <div class="hl-gold" style="border-radius:12px;padding:1rem 1.2rem"><p style="font-size:.78rem;line-height:1.7"><strong>Classazione:</strong> ben classato = lungo trasporto; mal classato = deposizione rapida o breve trasporto.</p></div>
+          <div class="hl-blue" style="border-radius:12px;padding:1rem 1.2rem"><p style="font-size:.78rem;line-height:1.7"><strong>Colore:</strong> rosso/arancio = ossidante (continentale); grigio/nero = riducente (materia organica).</p></div>
+        </div>
+      </div>
+      <div class="canvas-3d" style="height:400px" id="c3d-s14">
+        <div class="canvas-label">3D — Lente d'ingrandimento geologica</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== S15 CONCLUSIONE ===== -->
+<section id="s15">
+  <div class="container reveal" style="text-align:center">
+    <div class="section-label" style="text-align:center">14 — Epilogo</div>
+    <h2 class="section-title" style="text-align:center">Un Mondo di <em>Strati</em></h2>
+    <div class="gold-bar" style="margin:0 auto 1.5rem"></div>
+    <p class="body" style="max-width:680px;margin:0 auto 2.5rem">Le rocce sedimentarie sono la memoria della Terra — ogni strato è un capitolo, ogni fossile un testimone. Dai deserti della Giordania alle bianche scogliere della Scala dei Turchi, la storia è scritta nella pietra.</p>
+    <div class="loc-grid">
+      <div class="loc-card"><div class="loc-thumb">🏜️</div><div class="loc-name">Wadi Rum</div><div class="loc-country">Giordania</div></div>
+      <div class="loc-card"><div class="loc-thumb">🤍</div><div class="loc-name">Scala dei Turchi</div><div class="loc-country">Sicilia, Italia</div></div>
+      <div class="loc-card"><div class="loc-thumb">🌊</div><div class="loc-name">Pamukkale</div><div class="loc-country">Turchia</div></div>
+      <div class="loc-card"><div class="loc-thumb">🕳️</div><div class="loc-name">Frasassi</div><div class="loc-country">Marche, Italia</div></div>
+      <div class="loc-card"><div class="loc-thumb">🏔️</div><div class="loc-name">Dolomiti</div><div class="loc-country">Alto Adige, Italia</div></div>
+    </div>
+    <div style="margin-top:3rem">
+      <button class="cta-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑ Torna all'Inizio</button>
+    </div>
+    <p style="margin-top:2rem;font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(232,213,163,.25)">Le Rocce Sedimentarie · Guida Completa · 15 Capitoli</p>
+  </div>
+</section>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+// ===== PROGRESS BAR =====
+window.addEventListener('scroll',()=>{
+  const p=(window.scrollY/(document.body.scrollHeight-window.innerHeight))*100;
+  document.getElementById('progress').style.width=p+'%';
+});
+
+// ===== NAV DOTS =====
+const sections=document.querySelectorAll('section');
+const dotsContainer=document.getElementById('nav-dots');
+sections.forEach((_,i)=>{
+  const d=document.createElement('div');
+  d.className='nav-dot'+(i===0?' active':'');
+  d.title=`Sezione ${i+1}`;
+  d.onclick=()=>sections[i].scrollIntoView({behavior:'smooth'});
+  dotsContainer.appendChild(d);
+});
+const dots=document.querySelectorAll('.nav-dot');
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const i=Array.from(sections).indexOf(e.target);
+      dots.forEach((d,j)=>d.classList.toggle('active',j===i));
+    }
+  });
+},{threshold:.4});
+sections.forEach(s=>obs.observe(s));
+
+// ===== REVEAL ANIMATIONS =====
+document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el=>{
+  const io=new IntersectionObserver(([entry])=>{
+    if(entry.isIntersecting){el.classList.add('vis');io.disconnect();}
+  },{threshold:.15});
+  io.observe(el);
+});
+
+// ===== BARS ANIMATION =====
+const barsObs=new IntersectionObserver(([e])=>{
+  if(e.isIntersecting){
+    document.querySelectorAll('.bar-fill').forEach(b=>{
+      const w=b.dataset.w;
+      setTimeout(()=>{b.style.width=w+'%';},300);
+    });
+    barsObs.disconnect();
+  }
+},{threshold:.3});
+const bc=document.getElementById('bars-container');
+if(bc)barsObs.observe(bc);
+
+// ===== THREE.JS 3D SCENES =====
+function makeRenderer(container,w,h){
+  const r=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  r.setSize(w,h);r.setPixelRatio(Math.min(devicePixelRatio,2));
+  r.setClearColor(0x000000,0);container.insertBefore(r.domElement,container.firstChild);
+  return r;
+}
+function makeScene(){
+  const s=new THREE.Scene();
+  const al=new THREE.AmbientLight(0xffffff,.4);s.add(al);
+  const dl=new THREE.DirectionalLight(0xffd280,.9);dl.position.set(3,4,3);s.add(dl);
+  const dl2=new THREE.DirectionalLight(0x4488aa,.4);dl2.position.set(-3,-2,-1);s.add(dl2);
+  return s;
+}
+function makeCamera(w,h){
+  const c=new THREE.PerspectiveCamera(45,w/h,.1,100);c.position.set(0,0,4);return c;
+}
+
+const renderers=[];
+
+// --- COVER strata canvas ---
+(function(){
+  const canvas=document.getElementById('strata-bg');
+  const ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+  window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
+  const layers=[
+    {y:.0,h:.13,c:'#1B4F72',s:.4},{y:.13,h:.1,c:'#C8860A',s:-.3},
+    {y:.23,h:.09,c:'#2a1408',s:.2},{y:.32,h:.12,c:'#C1440E',s:-.2},
+    {y:.44,h:.1,c:'#6B8F71',s:.25},{y:.54,h:.1,c:'#E8D5A3',s:-.15},
+    {y:.64,h:.11,c:'#D4AF37',s:.35},{y:.75,h:.12,c:'#1a0a04',s:-.1},
+    {y:.87,h:.13,c:'#0d2d42',s:.15},
+  ];
+  let t=0;
+  function draw(){
+    const W=canvas.width,H=canvas.height;
+    ctx.clearRect(0,0,W,H);
+    layers.forEach(l=>{
+      const o=Math.sin(t*l.s+l.y*8)*10;
+      ctx.fillStyle=l.c;ctx.globalAlpha=.45;
+      ctx.beginPath();ctx.moveTo(0,H*l.y+o);
+      for(let x=0;x<=W;x+=18){ctx.lineTo(x,H*l.y+o+Math.sin(x/70+t*.6+l.y*4)*6);}
+      ctx.lineTo(W,H*(l.y+l.h)+o);
+      for(let x=W;x>=0;x-=18){ctx.lineTo(x,H*(l.y+l.h)+o+Math.sin(x/70+t*.6+l.y*4)*4);}
+      ctx.closePath();ctx.fill();
+    });
+    ctx.globalAlpha=1;t+=.007;requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// --- HELPER: Stratified layers scene ---
+function makeStratScene(container,colors){
+  const el=container;
+  if(!el)return;
+  const W=el.offsetWidth||300,H=el.offsetHeight||200;
+  const renderer=makeRenderer(el,W,H);
+  const scene=makeScene();
+  const cam=makeCamera(W,H);cam.position.set(0,0,5);
+  colors.forEach((c,i)=>{
+    const geo=new THREE.BoxGeometry(3.5,.38,.5+Math.random()*.3);
+    const mat=new THREE.MeshPhongMaterial({color:c,shininess:30,transparent:true,opacity:.92});
+    const m=new THREE.Mesh(geo,mat);
+    m.position.y=(i-(colors.length/2))*.45;
+    m.rotation.z=(Math.random()-.5)*.04;
+    scene.add(m);
+  });
+  let t=0;
+  function anim(){requestAnimationFrame(anim);t+=.008;scene.rotation.y=Math.sin(t*.3)*.25;renderer.render(scene,cam);}
+  anim();renderers.push(renderer);
+}
+
+// --- S2: layered sphere ---
+(function(){
+  const el=document.getElementById('c3d-s2');if(!el)return;
+  const W=el.offsetWidth||300,H=el.offsetHeight||200;
+  const renderer=makeRenderer(el,W,H);
+  const scene=makeScene();
+  const cam=makeCamera(W,H);cam.position.set(0,0,4);
+  const colors=[0x1B4F72,0xC8860A,0x2a1408,0xC1440E,0x6B8F71,0xE8D5A3,0xD4AF37];
+  colors.forEach((c,i)=>{
+    const geo=new THREE.TorusGeometry(1.2-i*.12,.08,12,80);
+    const mat=new THREE.MeshPhongMaterial({color:c,shininess:40,transparent:true,opacity:.85});
+    const m=new THREE.Mesh(geo,mat);
+    m.rotation.x=Math.PI/2+i*.08;
+    scene.add(m);
+  });
+  let t=0;
+  function anim(){requestAnimationFrame(anim);t+=.006;scene.rotation.y=t*.4;scene.rotation.x=Math.sin(t*.3)*.15;renderer.render(scene,cam);}
+  anim();
+})();
+
+// --- S3: particles settling ---
+(function(){
+  const el=document.getElementById('c3d-s3');if(!el)return;
+  const W=el.offsetWidth||300,H=el.offsetHeight||180;
+  const renderer=makeRenderer(el,W,H);
+  const scene=makeScene();
+  const cam=makeCamera(W,H);cam.position.set(0,1,5);
+  const clrs=[0xD4AF37,0xC8860A,0xC1440E,0x6B8F71,0xE8D5A3];
+  const particles=[];
+  for(let i=0;i<80;i++){
+    const r=.05+Math.random()*.1;
+    const geo=new THREE.SphereGeometry(r,6,6);
+    const mat=new THREE.MeshPhongMaterial({color:clrs[Math.floor(Math.random()*clrs.length)]});
+    const m=new THREE.Mesh(geo,mat);
+    m.position.set((Math.random()-0.5)*4,(Math.random()-0.5)*3,(Math.random()-0.5)*2);
+    m.userData={vy:-(0.005+Math.random()*.015),floor:-1.5+i*.004};
+    scene.add(m);particles.push(m);
+  }
+  // floor layers
+  [0xC8860A,0x6B8F71,0xD4AF37].forEach((c,i)=>{
+    const geo=new THREE.BoxGeometry(4,.15,2);
+    const mat=new THREE.MeshPhongMaterial({color:c,transparent:true,opacity:.7});
+    const m=new THREE.Mesh(geo,mat);m.position.y=-1.4-i*.18;scene.add(m);
+  });
+  let t=0;
+  function anim(){
+    requestAnimationFrame(anim);t+=.01;
+    particles.forEach(p=>{
+      p.position.y+=p.userData.vy;
+      if(p.position.y<p.userData.floor)p.position.y=2;
+    });
+    scene.rotation.y=Math.sin(t*.2)*.3;renderer.render(scene,cam);
+  }
+  anim();
+})();
+
+// --- S4: ice crack ---
+(function(){
+  const el=document.getElementById('c3d-s4');if(!el)return;
+  const W=el.offsetWidth||300,H=el.offsetHeight||260;
+  const renderer=makeRenderer(el,W,H);
+  const scene=makeScene();
+  const cam=makeCamera(W,H);cam.position.set(0,0,5);
+  const rockGeo=new THREE.BoxGeometry(2.5,2,.8);
+  const rockMat=new THREE.MeshPhongMaterial({color:0x8a6a4a,shininess:10});
+  scene.add(new THREE.Mesh(rockGeo,rockMat));
+  // crack lines
+  for(let i=0;i<8;i++){
+    const pts=[];
+    let x=(Math.random()-.5)*2.5,y=(Math.random()-.5)*2;
+    pts.push(new THREE.Vector3(x,y,.41));
+    for(let j=0;j<5;j++){x+=(Math.random()-.5)*.5;y+=(Math.random()-.5)*.5;pts.push(new THREE.Vector3(x,y,.41));}
+    const geo=new THREE.BufferGeometry().setFromPoints(pts);
+    const mat=new THREE.LineBasicMaterial({color:0x88ccff,linewidth:2,transparent:true,opacity:.8});
+    scene.add(new THREE.Line(geo,mat));
+  }
+  // ice crystals
+  for(let i=0;i<6;i++){
+    const geo=new THREE.OctahedronGeometry(.15+Math.random()*.1);
+    const mat=new THREE.MeshPhongMaterial({color:0xaaddff,transparent:true,opacity:.7,shininess:80});
+    const m=new THREE.Mesh(geo,mat);
+    m.position.set((Math.random()-.5)*2,(Math.random()-.5)*1.5,.5+i*.05);
+    scene.add(m);
+  }
+  let t=0;
+  function anim(){requestAnimationFrame(anim);t+=.01;scene.rotation.y=Math.sin(t*.3)*.4;renderer.render(scene,cam);}
+  anim();
+})();
+
+// --- S5: dissolving spheres ---
+(function(){
+  const el=document.getElementById('c3d-s5');if(!el)return;
+  const W=el.offsetWidth||300,H=el.offsetHeight||260;
+  const renderer=makeRenderer(el,W,H);
+  const scene=makeScene();
+  const cam=makeCamera(W,H);cam.position.set(0,0,5);
+  // main rock dissolving
+  const rockMesh=new THREE.Mesh(new THREE.IcosahedronGeometry(1.2,2),new THREE.MeshPhongMaterial({color:0xb08050,shininess:15,wireframe:false}));
+  scene.add(rockMesh);
+  // water bubbles
+  const bubbles=[];
+  for(let i=0;i<30;i++){
+    const m=new THREE.Mesh(new THREE.SphereGeometry(.04+Math.random()*.08,8,8),new THREE.MeshPhongMaterial({color:0x4499dd,transparent:true,opacity:.5,shininess:80}));
+    m.position.set((Math.random()-.5)*2.5,(Math.random()-.5)*2.5,(Math.random()-.5)*1);
+    m.userData={vy:.01+Math.random()*.02};scene.add(m);bubbles.push(m);
+  }
+  let t=0;
+  function anim(){
+    requestAnimationFrame(anim);t+=.01;
+    rockMesh.rotation.y+=.005;rockMesh.rotation.x+=.003;
+    const s=.98+Math.sin(t*.5)*.02;rockMesh.scale.set(s,s,s);
+    bubbles.forEach(b=>{b.position.y+=b.userData.vy;if(b.position.y>2)b.position.y=-2;});
+    renderer.render(scene,cam);
+  }
+  anim();
+})();
+
+// --- S6: river flow particles ---
+(function(){
+  const el=document.getElementById('c3d-s6');if(!el)return;
+  const W=el.offsetWidth||300,H=el.offsetHeight||340;
+  const renderer=makeRenderer(el,W,H);
+  const scene=makeScene();
+  const cam=makeCamera(W,H);cam.position.set(0,2,6);cam.lookAt(0,0,0);
+  // river bed layers
+  const cols=[0xC8860A,0xD4AF37,0x6B8F71,0x8a6a4a];
+  cols.forEach((c,i)=>{
+    const m=new THREE.Mesh(new THREE.BoxGeometry(6,.2,2),new THREE.MeshPhongMaterial({color:c,transparent:true,opacity:.75}));
+    m.position.y=-1-i*.22;scene.add(m);
+  });
+  // flow particles
+  const flow=[];
+  for(let i=0;i<60;i++){
+    const sz=.04+Math.random()*.12;
+    const m=new THREE.Mesh(new THREE.SphereGeometry(sz,6,6),new THREE.MeshPhongMaterial({color:[0xD4AF37,0xC8860A,0xE8D5A3][Math.floor(Math.random()*3)]}));
+    m.position.set(-3+Math.random()*6,(Math.random()-.5)*1.5,(Math.random()-.5)*1.5);
+    m.userData={vx:-.02-.03*sz,resetX:3};scene.add(m);flow.push(m);
+  }
+  let t=0;
+  function anim(){
+    requestAnimationFrame(anim);t+=.01;
+    flow.forEach(p=>{
+      p.position.x+=p.userData.vx;
+      p.position.y+=Math.sin(t+p.position.x)*.005;
+      if(p.position.x<-3.5)p.position.x=3+Math.random();
+    });
+    scene.rotation.y=Math.sin(t*.15)*.2;renderer.render(scene,cam);
+  }
+  anim();
+})();
+
+// --- S7: compaction animation ---
+(function(){
+  const el=document.getElementById('c3d-s7');if(!el)return;
+  const W=el.offsetWidth||300,H=el.offsetHeight||250;
+  const renderer=makeRenderer(el,W,H);
+  const scene=makeScene();
+  const cam=makeCamera(W,H);cam.position.set(0,1,5);
+  const layers2=[];
+  const lc=[0xC8860A,0xD4AF37,0x6B8F71,0xC1440E,0x1B4F72];
+  lc.forEach((c,i)=>{
+    const m=new THREE.Mesh(new THREE.BoxGeometry(3,.5,.8),new THREE.MeshPhongMaterial({color:c,transparent:true,opacity:.88}));
+    m.position.y=1.5-i*.6;scene.add(m);layers2.push(m);
+  });
+  let t=0,compacting=true;
+  function anim(){
+    requestAnimationFrame(anim);t+=.008;
+    if(compacting){
+      layers2.forEach((l,i)=>{
+        if(i>0){const target=-1.6+i*.38;if(l.position.y>target)l.position.y-=.003;}
+      });
+      if(layers2[layers2.length-1].position.y<=-1.2)compacting=false;
+    }
+    scene.rotation.y=Math.sin(t*.25)*.35;renderer.render(scene,cam);
+  }
+  anim();
+})();
+
+// --- S8: rock type mini scenes ---
+function miniRockScene(id,color,shape){
+  const el=document.getElementById(id);if(!el)return;
+  const W=el.offsetWidth||140,H=el.offsetHeight||110;
+  const renderer=makeRenderer(el,W,H);
+  const scene=makeScene();
+  const cam=new THREE.PerspectiveCamera(45,W/H,.1,100);cam.position.set(0,0,3.5);
+  let mesh;
+  if(shape==='conglo'){
+    const g=new THREE.Group();
+    for(let i=0;i<12;i++){
+      const r=.15+Math.random()*.2;
+      const m=new THREE.Mesh(new THREE.SphereGeometry(r,8,8),new THREE.MeshPhongMaterial({color:color,shininess:20}));
+      m.position.set((Math.random()-.5)*1.5,(Math.random()-.5)*1.2,(Math.random()-.5)*.8);
+      g.add(m);
+    }
+    mesh=g;
+  } else if(shape==='breccia'){
+    const g=new THREE.Group();
+    for(let i=0;i<10;i++){
+      const m=new THREE.Mesh(new THREE.TetrahedronGeometry(.2+Math.random()*.18),new THREE.MeshPhongMaterial({color:color,shininess:20}));
+      m.position.set((Math.random()-.5)*1.5,(Math.random()-.5)*1.2,(Math.random()-.5)*.8);
+      m.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,0);g.add(m);
+    }
+    mesh=g;
+  } else if(shape==='arenaria'){
+    mesh=new THREE.Mesh(new THREE.BoxGeometry(1.8,1.2,.5),new THREE.MeshPhongMaterial({color:color,shininess:5}));
+    // add grain texture via wireframe overlay
+    const wf=new THREE.Mesh(new THREE.BoxGeometry(1.8,1.2,.5),new THREE.MeshBasicMaterial({color:0x000000,wireframe:true,transparent:true,opacity:.08}));
+    mesh.add(wf);
+  } else {
+    mesh=new THREE.Mesh(new THREE.BoxGeometry(1.8,1.2,.3),new THREE.MeshPhongMaterial({color:color,shininess:2}));
+  }
+  scene.add(mesh);
+  let t=0;
+  function anim(){requestAnimationFrame(anim);t+=.01;mesh.rotation.y=t*.4;renderer.render(scene,cam);}
+  anim();
+}
+miniRockScene('c3d-conglo',0x8a6a4a,'conglo');
+miniRockScene('c3d-breccia',0x7a5030,'breccia');
+miniRockScene('c3d-arenaria',0xd4a855,'arenaria');
+miniRockScene('c3d-argilla',0x6a8060,'argilla');
+
+// --- S9: crystal clusters ---
+(function(){
+  const el=document.getElementById('c3d-s9');if(!el)return;
+  const W=el.offsetWidth||300,H=el.offsetHeight||420;
+  const renderer=makeRenderer(el,W,H);
+  const scene=makeScene();
+  const cam=makeCamera(W,H);cam.position.set(0,1,5);
+  // crystal cluster
+  for(let i=0;i<18;i++){
+    const h=.3+Math.random()*.8;
+    const geo=new THREE.CylinderGeometry(.04,.1,h,6);
+    const mat=new THREE.MeshPhongMaterial({color:0xddeeff,transparent:true,opacity:.75,shininess:120});
+    const m=new THREE.Mesh(geo,mat);
+    const ang=Math.random()*Math.PI*2,r=.3+Math.random()*.8;
+    m.position.set(Math.cos(ang)*r,0,Math.sin(ang)*r);
+    m.rotation.set((Math.random()-.5)*.5,(Math.random()-.5)*.5,0);scene.add(m);
+    // tip
+    const tip=new THREE.Mesh(new THREE.ConeGeometry(.04,h*.4,6),new THREE.MeshPhongMaterial({color:0xaaccee,transparent:true,opacity:.8,shininess:100}));
+    tip.position.y=h/2+h*.2;m.add(tip);
+  }
+  // base platform
+  const base=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.7,.2,16),new THREE.MeshPhongMaterial({color:0x8a7050,shininess:10}));
+  base.position.y=-.5;scene.add(base);
+  let t=0;
+  function anim(){requestAnimationFrame(anim);t+=.008;scene.rotation.y=t*.3;renderer.render(scene,cam);}
+  anim();
+})();
+
+// --- S10: coral reef ---
+(function(){
+  const el=document.getElementById('c3d-s10');if(!el)return;
+  const W=el.offsetWidth||300,H=el.offsetHeight||420;
+  const renderer=makeRenderer(el,W,H);
+  const scene=makeScene();
+  scene.fog=new THREE.FogExp2(0x001428,.08);
+  const cam=makeCamera(W,H);cam.position.set(0,1,6);
+  // sea floor
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(8,6),new THREE.MeshPhongMaterial({color:0x8a7050}));
+  floor.rotation.x=-Math.PI/2;floor.position.y=-1.5;scene.add(floor);
+  // coral structures
+  const coralColors=[0xff6b6b,0xff9a4a,0xff5fa0,0xffcc44,0x88ddaa];
+  for(let i=0;i<20;i++){
+    const h=.3+Math.random()*1.2;
+    const geo=new THREE.CylinderGeometry(.04+Math.random()*.08,.08+Math.random()*.1,h,7);
+    const mat=new THREE.MeshPhongMaterial({color:coralColors[Math.floor(Math.random()*coralColors.length)],shininess:30});
+    const m=new THREE.Mesh(geo,mat);
+    m.position.set((Math.random()-.5)*5,-1.5+h/2,(Math.random()-.5)*3);
+    m.rotation.z=(Math.random()-.5)*.3;scene.add(m);
+    // branch tops
+    for(let b=0;b<3;b++){
+      const bm=new THREE.Mesh(new THREE.SphereGeometry(.08+Math.random()*.06,6,6),new THREE.MeshPhongMaterial({color:coralColors[Math.floor(Math.random()*coralColors.length)]}));
+      bm.position.set((Math.random()-.5)*.3,h/2,(Math.random()-.5)*.3);m.add(bm);
+    }
+  }
+  // bubbles
+  const bubbles=[];
+  for(let i=0;i<25;i++){
+    const b=new THREE.Mesh(new THREE.SphereGeometry(.03+Math.random()*.05,6,6),new THREE.MeshPhongMaterial({color:0x88ccff,transparent:true,opacity:.45}));
+    b.position.set((Math.random()-.5)*5,Math.random()*3-1.5,(Math.random()-.5)*3);
+    b.userData.vy=.01+Math.random()*.015;scene.add(b);bubbles.push(b);
+  }
+  let t=0;
+  function anim(){
+    requestAnimationFrame(anim);t+=.01;
+    bubbles.forEach(b=>{b.position.y+=b.userData.vy;if(b.position.y>2)b.position.y=-1.5;});
+    cam.position.x=Math.sin(t*.2)*.8;cam.lookAt(0,0,0);renderer.render(scene,cam);
+  }
+  anim();
+})();
+
+// --- S11: crystal comparison ---
+(function(){
+  const el=document.getElementById('c3d-s11');if(!el)return;
+  const W=el.offsetWidth||300,H=el.offsetHeight||360;
+  const renderer=makeRenderer(el,W,H);
+  const scene=makeScene();
+  const cam=makeCamera(W,H);cam.position.set(0,0,7);
+  // three crystal structures side by side
+  const configs=[
+    {x:-2,color:0xd4e8ff,geo:'oct'},
+    {x:0,color:0xffddaa,geo:'rhombo'},
+    {x:2,color:0xaaddbb,geo:'cube'},
+  ];
+  configs.forEach(cfg=>{
+    let geo;
+    if(cfg.geo==='oct')geo=new THREE.OctahedronGeometry(.8);
+    else if(cfg.geo==='rhombo')geo=new THREE.IcosahedronGeometry(.7,0);
+    else geo=new THREE.BoxGeometry(.9,.9,.9);
+    const wf=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:cfg.color,wireframe:true,transparent:true,opacity:.6}));
+    const solid=new THREE.Mesh(geo,new THREE.MeshPhongMaterial({color:cfg.color,transparent:true,opacity:.25,shininess:80}));
+    const g=new THREE.Group();g.add(solid);g.add(wf);g.position.x=cfg.x;
+    scene.add(g);
+  });
+  let t=0;
+  function anim(){requestAnimationFrame(anim);t+=.01;scene.children.filter(c=>c.isGroup).forEach((g,i)=>{g.rotation.y=t*.5+i;g.rotation.x=Math.sin(t*.3+i)*.3;});renderer.render(scene,cam);}
+  anim();
+})();
+
+// --- S13: strata layers forming ---
+(function(){
+  const el=document.getElementById('c3d-s13');if(!el)return;
+  const W=el.offsetWidth||300,H=el.offsetHeight||400;
+  const renderer=makeRenderer(el,W,H);
+  const scene=makeScene();
+  const cam=makeCamera(W,H);cam.position.set(2,1.5,5);cam.lookAt(0,0,0);
+  const layerColors=[0x1B4F72,0xC8860A,0x6B8F71,0xC1440E,0xD4AF37,0x8a5c06,0x2a4a8a];
+  const layerMeshes=[];
+  layerColors.forEach((c,i)=>{
+    const h=.25+Math.random()*.1;
+    const m=new THREE.Mesh(new THREE.BoxGeometry(3.5,h,.9),new THREE.MeshPhongMaterial({color:c,shininess:15}));
+    m.position.y=i*.32-1.2;
+    m.userData.targetY=m.position.y;
+    m.position.y=m.position.y+4;// start from above
+    scene.add(m);layerMeshes.push(m);
+  });
+  let t=0;
+  function anim(){
+    requestAnimationFrame(anim);t+=.01;
+    layerMeshes.forEach((m,i)=>{
+      const delay=i*.3;const elapsed=Math.max(0,t-delay);
+      if(elapsed>0&&m.position.y>m.userData.targetY){m.position.y-=.02;if(m.position.y<m.userData.targetY)m.position.y=m.userData.targetY;}
+    });
+    scene.rotation.y=Math.sin(t*.2)*.4;renderer.render(scene,cam);
+  }
+  anim();
+})();
+
+// --- S14: magnifier scene ---
+(function(){
+  const el=document.getElementById('c3d-s14');if(!el)return;
+  const W=el.offsetWidth||300,H=el.offsetHeight||400;
+  const renderer=makeRenderer(el,W,H);
+  const scene=makeScene();
+  const cam=makeCamera(W,H);cam.position.set(0,0,5);
+  // rock sample with details
+  const rockBase=new THREE.Mesh(new THREE.BoxGeometry(2.8,1.8,.4),new THREE.MeshPhongMaterial({color:0x8a7050,shininess:8}));
+  scene.add(rockBase);
+  // fossil outline
+  const pts=[];const n=16;
+  for(let i=0;i<=n;i++){const a=i/n*Math.PI*2;pts.push(new THREE.Vector3(Math.cos(a)*.4,Math.sin(a)*.25,.21));}
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0xffdd88})));
+  // crystal inclusions
+  for(let i=0;i<8;i++){
+    const m=new THREE.Mesh(new THREE.OctahedronGeometry(.06+Math.random()*.04),new THREE.MeshPhongMaterial({color:0xaaddff,shininess:80,transparent:true,opacity:.8}));
+    m.position.set((Math.random()-.5)*2,(Math.random()-.5)*1.3,.22);scene.add(m);
+  }
+  // magnifier glass ring
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(.6,.04,12,48),new THREE.MeshPhongMaterial({color:0xD4AF37,shininess:80,metalness:.5}));
+  ring.position.z=.5;scene.add(ring);
+  const handle=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,.7),new THREE.MeshPhongMaterial({color:0xD4AF37,shininess:80}));
+  handle.position.set(.55,-.55,.5);handle.rotation.z=-Math.PI/4;scene.add(handle);
+  let t=0;
+  function anim(){
+    requestAnimationFrame(anim);t+=.01;
+    ring.position.x=Math.sin(t*.4)*.6;ring.position.y=Math.cos(t*.35)*.3;
+    handle.position.x=ring.position.x+.55*Math.cos(-Math.PI/4);
+    handle.position.y=ring.position.y-.55*Math.sin(Math.PI/4);
+    renderer.render(scene,cam);
+  }
+  anim();
+})();
+
+</script>
+</body>
+</html>
